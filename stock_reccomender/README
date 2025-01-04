@@ -1,0 +1,15 @@
+The purpose of this is to build an AI agent that will reccomend stocks, 
+
+Some ideas:
+
+Use OpenBB Terminal tor analyzing stocks, cryptocurrency. Can utilize machine learning for forecasting. Can also use finanical APIs. 
+OpenBB
+
+USe TensorTrade to build trading algorithms using reinforcement learning. Can simulate trading environments. Plays nice with TensorFlow and PyTorch. Train reinforcement learning models to recommend daily trades or stocks.
+
+Use Alpaca AI Agent for stock trading via API.
+
+
+Use Backtrader with Custom Models for backtesting trading strategies.
+
+Use PyPortfolioOpt to optimize portfolio and FinRL (Financial Reinforcement Learning) 
