@@ -8,13 +8,18 @@ openai.api_key = API_KEY
 import re
 from youtube_transcript_api import YouTubeTranscriptApi
 import markdown
+import argparse
 
+parser = argparse.ArgumentParser(
+                    prog='summarize_youtube',
+                    description='Summarizes a YouTube video')
+
+parser.add_argument('-l','--link',help="The full html to YouTube video")
+args = parser.parse_args()
+# TODO run validity check
+youtube_url = args.link
 
 # extract YouTube transcript
-
-#TODO make this parameter
-youtube_url = "https://www.youtube.com/watch?v=Bqo2XGDZtVU&t=531s"
-
 # extract video ID with regex
 video_id_regex = r'(?:v=|\/)([0-9A-Za-z_-]{11}).*'
 match = re.search(video_id_regex, youtube_url)
