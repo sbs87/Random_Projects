@@ -15,9 +15,13 @@ parser = argparse.ArgumentParser(
                     description='Summarizes a YouTube video')
 
 parser.add_argument('-l','--link',help="The full html to YouTube video")
+parser.add_argument('-o','--output',help="Filename to write summary",default="summarized_video.html",required=False)
+
 args = parser.parse_args()
 # TODO run validity check
 youtube_url = args.link
+output_fn = args.output
+
 
 # extract YouTube transcript
 # extract video ID with regex
@@ -67,5 +71,5 @@ print(trasncript_output)
 
 output_yt_sum_html = markdown.markdown(trasncript_output)
 
-with open("summarized_youtube.html", "w") as f:
+with open(output_fn, "w") as f:
     f.write(output_yt_sum_html)
