@@ -1,12 +1,8 @@
-# This script taylors my resume to a job description  using CHatGPT. 
+# This script tailors my resume to a job description  using CHatGPT. 
 # Idea from https://medium.com/towards-data-science/5-ai-projects-you-can-build-this-weekend-with-python-c57724e9c461
 
-import openai
 import markdown
-
-from generic_openai_key import API_KEY
-
-openai.api_key = API_KEY
+import chatgpt_handler
 
 with open("resume.md", "r") as file:
     input_resume = file.read()
@@ -62,19 +58,8 @@ Return the updated resume in Markdown format.
 
 """
     
-#TODO add verbose/feedback to stdout
-# make api call
-response = openai.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": prompt}
-    ], 
-    temperature = 0.25
-)
-    
-# extract response
-output_resume_md = response.choices[0].message.content
+output_resume_md = chatgpt_handler.call_chatgpt(prompt,temperature=0.2)
+
 
 
 # Write original and tailored resume to html 
