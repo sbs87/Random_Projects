@@ -12,3 +12,11 @@ The goal is to keep my mind fresh with different software or analysis projects.
   * Dabbling in AI agent use cases
   * The goal is to have an AI agent learn form historicl bitcoin or NYSE prices to reccoemend which assests to buy
   * This isn't a super serious project since I knpw there are lots of others, but this is more to understand these systems and platforms more deeply 
+* summarize_youtube_video
+  * Summarizes a Youtube video
+  * Given the URL to  YT video, pulls the transcript and summarizes using ChatGPT
+  * Leverages both the ChatGPT API and Youtube API
+* tailor_resume
+  * Tailors a resume to a job description (JD)
+  * Given a JD txt file and a resume in markdown format, uses ChatGPT to tailor a resume to the JD
+  * Outputs resume in HTML
