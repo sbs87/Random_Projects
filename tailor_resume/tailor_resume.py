@@ -3,37 +3,35 @@
 
 import markdown
 import chatgpt_handler
+import argparse
 
-with open("resume.md", "r") as file:
+parser = argparse.ArgumentParser(
+                    prog='tailor_resume',
+                    description='Tailor a resume to a job description')
+
+parser.add_argument('-r','--resume',help="The resume in MARKDOWN. Default 'resume.md'",default="resume.md",required=False)
+parser.add_argument('-rh','--resume-html',help="Output filename for original resume as HTML. Optional. Default 'original_resume.html'",default="original_resume.html",required=False)
+parser.add_argument('-j','--job-description',help="The job description in txt")
+parser.add_argument('-o','--output',help="Filename to write tailored resume in html. Optional. Default 'tailored_resume.html'",default="tailored_resume.html",required=False)
+parser.add_argument('-t','--temperature',help="Temperature to use in ChatGPT response. Optional. Default 0.25",default=0.25,required=False)
+args = parser.parse_args()
+
+resume_file = args.resume
+resume_html_file = args.resume_html
+job_desciption_file = args.job_description
+output_file = args.output
+temperature = args.temperature
+
+# Read in resume as markdown
+#TODO get chatgpt to convert to markdown if not in MD
+with open(resume_file, "r") as file:
     input_resume = file.read()
 
-
-job_desciption="""POSITION SUMMARY:
-
-The Lead Bioinformatician participates in the development and validation of cutting-edge technologies for analysis of genetic data. Designs and implements algorithms of varying complexity in the context of research, development, product validations, clinical trials, regulatory submissions, and scientific publications.
-
-PRIMARY RESPONSIBILITIES:
-
-Provide technical leadership in the design and execution of complex experiments and all phases of product development.
-Design and review statistical methodology in statistical analysis plans and protocols.
-Develop algorithms and models for complex data analysis.
-Produce high quality written documentation including study protocols, statistical analysis plans and reports, and regulatory submissions
-Act as an internal technical consultant to other functional groups or their members by providing expert advice on bioinformatics methodology
-Performs other duties as assigned
-QUALIFICATIONS:
-
-Master’s degree in bioinformatics with 6 years post-graduate experience, or PhD with 3 years of post-graduate experience (preferred)
-At least 4 years practical experience with data analysis software such as Python or R
-KNOWLEDGE, SKILLS, AND ABILITIES:
-
-Expert knowledge of bioinformatics tools in mapping, variant calling, CNV analysis and statistical methods
-Familiarity with typical approaches, best practices, and regulatory standards in CLIA product development design
-Ability to produce high quality written documentation for varying audiences
-Ability to work independently while managing multiple objectives and timelines
-Desire to work in a fast-paced environment with potential for high impact in a small team"""
+# Read in JD
+with open(job_desciption_file, "r") as file:
+    job_desciption = file.read()
 
 # Open AI/ChatGPT prompt:
-
 prompt = f"""
 I have a resume formatted in Markdown and a job description. \
 Please adapt my resume to better align with the job requirements while \
@@ -58,20 +56,18 @@ Return the updated resume in Markdown format.
 
 """
     
-output_resume_md = chatgpt_handler.call_chatgpt(prompt,temperature=0.2)
-
-
+output_resume_md = chatgpt_handler.call_chatgpt(prompt,temperature=temperature)
 
 # Write original and tailored resume to html 
 # TODO remove the ChatGPT response not part of resume
 inout_resume_html = markdown.markdown(input_resume)
-with open("original_resume.html", "w") as f:
+with open(resume_html_file, "w") as f:
     f.write(inout_resume_html)
 
 
 output_resume_html = markdown.markdown(output_resume_md)
 
-with open("tailored_resume.html", "w") as f:
+with open(output_file, "w") as f:
     f.write(output_resume_html)
 
 
@@ -82,4 +78,5 @@ with open("tailored_resume.html", "w") as f:
 # # Convert an HTML file to PDF
 # pdfkit.from_file("output.html", "output.pdf")
 
-
+#TODO get resturn value of chatgpt to verify something happened. 
+print(f"Tailored resume at {output_file} using temperature {temperature}. Original resume at {resume_html_file}")
