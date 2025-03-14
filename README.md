@@ -20,3 +20,5 @@ The goal is to keep my mind fresh with different software or analysis projects.
   * Tailors a resume to a job description (JD)
   * Given a JD txt file and a resume in markdown format, uses ChatGPT to tailor a resume to the JD
   * Outputs resume in HTML
+* chatgpt_handler.py
+  * Wrapper for Open AI/ChatGPT API
