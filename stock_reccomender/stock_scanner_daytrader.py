@@ -56,16 +56,23 @@ def fetch_stock_info(tickers, short_period='5m', long_period='1d', short_interva
         hist_long = stock.history(period=long_period, interval=long_interval)
 
         stock_info_list.append({
-            'Stock Symbol': ticker,
-            'Market Cap': info.get('marketCap', 'N/A'),
+            'Symbol': ticker,
+            'MarketCap': info.get('marketCap', 'N/A'),
             'Float': info.get('floatShares', 'N/A'),
-            'Price of Share': info.get('regularMarketPrice', 'N/A'),
-            'Volume Traded (Last 5 Min)': hist_short['Volume'].sum() if not hist_short.empty else 'N/A',
-            'Volume Traded (Last Day)': hist_long['Volume'].iloc[0] if not hist_long.empty else 'N/A'
+            'Price': info.get('regularMarketPrice', 'N/A'),
+            'ShortTerm_Volume': hist_short['Volume'].sum() if not hist_short.empty else 'N/A',
+            'LongTerm_Volume': hist_long['Volume'].iloc[0] if not hist_long.empty else 'N/A',
+            'RSI': "FUTURE_FEATURE",
+            'VWAP': "FUTURE_FEATURE"
         })
 
     stock_info_df = pd.DataFrame(stock_info_list)
     return stock_info_df
+
+def sort_stock_info(stock_table):
+    stock_table['relative_volume'] = stock_table['ShortTerm_Volume'].replace("N/A",0) / stock_table['LongTerm_Volume'].replace("N/A",0) 
+    sorted_stock_table = stock_table.sort_values(by='relative_volume', ascending=False)
+    return sorted_stock_table
 
 
 # def main(tickers, interval=60):
@@ -96,7 +103,8 @@ def main(tickers, interval=60):
     while True:
         try:
             stock_info_table = fetch_stock_info(tickers)
-            latest_data = stock_info_table
+            latest_data = sort_stock_info(stock_info_table)
+            #latest_data = stock_info_table
             print(latest_data)
             time.sleep(interval)
         except KeyboardInterrupt:
@@ -140,11 +148,5 @@ if __name__ == "__main__":
 
 
     main(nasdaq_tickers, interval=interval)
-    # You can set how often the page reloads by modifying the `content` attribute in the meta tag
-    # inside the `render_template_string` function in the `index()` route.
 
-    # For example, to change the reload interval to 10 seconds, update this line:
-    # <meta http-equiv="refresh" content="5">
-    # to:
-    # <meta http-equiv="refresh" content="10">
     
