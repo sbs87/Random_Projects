@@ -12,6 +12,9 @@ import yfinance as yf
 import pandas as pd
 import argparse
 import requests
+from flask import Flask, render_template_string
+import threading
+from datetime import datetime
 
 parser = argparse.ArgumentParser(description="Stock Scanner for Day Traders")
 parser.add_argument(
@@ -65,35 +68,36 @@ def fetch_stock_info(tickers, short_period='5m', long_period='1d', short_interva
     return stock_info_df
 
 
-# def rank_stocks_by_volume_change(tickers, period='5d', interval='1m'):
-#     stock_data_list = []
+# def main(tickers, interval=60):
+#     while True:
+#         try:
+#             # Fetch and rank stocks by volume change
+#             #ranked_stocks = rank_stocks_by_volume_change(tickers)
+#             #print("Ranked Stocks by Volume Change:")
+#             #print(ranked_stocks)
 
-#     for ticker in tickers:
-#         stock_data = fetch_stock_data(ticker, period=period, interval=interval)
-#         if not stock_data.empty:
-#             stock_data['% Volume Change'] = calculate_volume_change(stock_data)
-#             latest_volume_change = stock_data['% Volume Change'].iloc[-1]
-#             stock_data_list.append({'Ticker': ticker, '% Volume Change': latest_volume_change})
+#             # Fetch stock information
+#             stock_info_table = fetch_stock_info(tickers)
+#             #print("Stock Information Table:")
+#             print(stock_info_table)
 
-#     ranked_stocks = pd.DataFrame(stock_data_list).sort_values(by='% Volume Change', ascending=False)
-#     return ranked_stocks
-
-
+#             # Wait for the specified interval before the next iteration
+#             time.sleep(interval)
+#         except KeyboardInterrupt:
+#             print("Monitoring stopped by user.")
+#             break
+#         except Exception as e:
+#             print(f"An error occurred: {e}")
+#             break
 
 def main(tickers, interval=60):
+    global latest_data
+    threading.Thread(target=run_web_server, daemon=True).start()
     while True:
         try:
-            # Fetch and rank stocks by volume change
-            #ranked_stocks = rank_stocks_by_volume_change(tickers)
-            #print("Ranked Stocks by Volume Change:")
-            #print(ranked_stocks)
-
-            # Fetch stock information
             stock_info_table = fetch_stock_info(tickers)
-            #print("Stock Information Table:")
-            print(stock_info_table)
-
-            # Wait for the specified interval before the next iteration
+            latest_data = stock_info_table
+            print(latest_data)
             time.sleep(interval)
         except KeyboardInterrupt:
             print("Monitoring stopped by user.")
@@ -103,4 +107,44 @@ def main(tickers, interval=60):
             break
 
 if __name__ == "__main__":
-    main(nasdaq_tickers, interval=interval)  # Run every 5 minutes
+    app = Flask(__name__)
+    latest_data = pd.DataFrame()  # Initialize as an empty DataFrame
+
+    @app.route("/")
+    def index():
+        global latest_data
+        global interval
+        #TODO add a way to parametrize "refresh" content
+        if latest_data is not None and not latest_data.empty:
+            last_updated_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            return render_template_string("""
+                <html>
+                    <head>
+                        <title>Stock Scanner</title>
+                        <meta http-equiv="refresh" content="5">
+                                          
+                    </head>
+                    <body>
+                        <h1>Stock Information</h1>
+                        <p>Last Updated: {{ last_updated_time }}, updating every X SECONDS</p>
+                        <p>Time interval: {{ additional_info }}</p>
+                        {{ table | safe }}
+                    </body>
+                </html>
+            """, table=latest_data.to_html(index=False), additional_info=interval, last_updated_time=last_updated_time)
+        else:
+            return "No data available yet."
+
+    def run_web_server():
+        app.run(debug=False, use_reloader=False)
+
+
+    main(nasdaq_tickers, interval=interval)
+    # You can set how often the page reloads by modifying the `content` attribute in the meta tag
+    # inside the `render_template_string` function in the `index()` route.
+
+    # For example, to change the reload interval to 10 seconds, update this line:
+    # <meta http-equiv="refresh" content="5">
+    # to:
+    # <meta http-equiv="refresh" content="10">
+    
