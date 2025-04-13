@@ -11,6 +11,7 @@ import time
 import yfinance as yf
 import pandas as pd
 import argparse
+import requests
 
 parser = argparse.ArgumentParser(description="Stock Scanner for Day Traders")
 parser.add_argument(
@@ -79,7 +80,7 @@ def rank_stocks_by_volume_change(tickers, period='5d', interval='1m'):
 
 
 
-def monitor_stocks(tickers, interval=60):
+def main(tickers, interval=60):
     while True:
         try:
             # Fetch and rank stocks by volume change
@@ -100,11 +101,6 @@ def monitor_stocks(tickers, interval=60):
         except Exception as e:
             print(f"An error occurred: {e}")
             break
-
-# Example usage:
-#nasdaq_tickers = ['AAPL', 'MSFT', 'GOOG', 'AMZN', 'TSLA']  # Replace with a full list of NASDAQ tickers
-#ranked_stocks = rank_stocks_by_volume_change(nasdaq_tickers, period='5d', interval='1m'))
-#print(ranked_stocks)
-
-# Example usage:
-monitor_stocks(nasdaq_tickers, interval=interval)  # Run every 5 minutes
+        
+if __name__ == "__main__":
+    main(nasdaq_tickers, interval=interval)  # Run every 5 minutes
