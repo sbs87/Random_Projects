@@ -18,11 +18,18 @@ from datetime import datetime
 
 parser = argparse.ArgumentParser(description="Stock Scanner for Day Traders")
 parser.add_argument(
-        '--tickers', 
-        type=str, 
-        nargs='+', 
-        required=True, 
-        help="List of stock tickers to monitor (e.g., AAPL MSFT GOOG)"
+        '--market_cap_upper_threshold', 
+        type=float, 
+        required=False, 
+        default=1E8,
+        help="Market cap upper threshold for filtering stocks. Default 1E8"
+)
+parser.add_argument(
+        '--market_cap_lower_threshold', 
+        type=float, 
+        required=False, 
+        default=10,
+        help="Market cap lower threshold for filtering stocks. Default 10"
 )
 parser.add_argument(
         '--interval', 
@@ -32,7 +39,8 @@ parser.add_argument(
 )
 args = parser.parse_args()
 interval = args.interval
-nasdaq_tickers = args.tickers
+market_cap_upper_threshold = args.market_cap_upper_threshold
+market_cap_lower_threshold = args.market_cap_lower_threshold
 
 def fetch_stock_data(ticker, period, interval):
     stock_data = yf.download(ticker, period=period, interval=interval)
@@ -97,6 +105,19 @@ def sort_stock_info(stock_table):
 #             print(f"An error occurred: {e}")
 #             break
 
+# Loads stock ticker symbols from a CSV file and filters them based on market cap
+def load_filter_tickers(infile, market_cap_upper_threshold, market_cap_lower_threshold):
+    
+    static_cols = ["Symbol", "Name", "Market Cap", "IPO Year", "Sector", "Industry"]
+    ticker_df =   pd.read_csv(infile)
+    ticker_df_subcols = ticker_df[static_cols]
+    ticker_df_subcols_filter = ticker_df_subcols[(ticker_df_subcols['Market Cap'] < market_cap_upper_threshold) & (ticker_df_subcols['Market Cap'] > market_cap_lower_threshold) ]
+
+    print(f"Number of symbols at {market_cap_upper_threshold} - {market_cap_lower_threshold}: {ticker_df_subcols_filter.shape}")
+
+    return ticker_df_subcols_filter["Symbol"].to_list(), ticker_df_subcols_filter
+
+
 def main(tickers, interval=60):
     global latest_data
     threading.Thread(target=run_web_server, daemon=True).start()
@@ -118,6 +139,9 @@ if __name__ == "__main__":
     app = Flask(__name__)
     latest_data = pd.DataFrame()  # Initialize as an empty DataFrame
 
+    # load tickers by market cap
+    nasdaq_tickers, nasdaq_tickers_df = load_filter_tickers(infile="~/Downloads/nasdaq_screener_1744643468853.csv",market_cap_upper_threshold=market_cap_upper_threshold, market_cap_lower_threshold=market_cap_lower_threshold)
+    
     @app.route("/")
     def index():
         global latest_data
