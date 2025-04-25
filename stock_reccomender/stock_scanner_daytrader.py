@@ -51,7 +51,8 @@ def fetch_stock_data(ticker, period, interval):
 #     volume_change = data['Volume'].pct_change() * 100
 #     return volume_change
 
-
+#TODO read in list of tickers at once - cycling through ~1000 symbols is way to slow
+# Can do this using yf.download([list]); however the result needs to be re-formatted
 def fetch_stock_info(tickers, short_period='5m', long_period='1d', short_interval='1m', long_interval='1d'):
     stock_info_list = []
 
@@ -111,7 +112,7 @@ def load_filter_tickers(infile, market_cap_upper_threshold, market_cap_lower_thr
     static_cols = ["Symbol", "Name", "Market Cap", "IPO Year", "Sector", "Industry"]
     ticker_df =   pd.read_csv(infile)
     ticker_df_subcols = ticker_df[static_cols]
-    ticker_df_subcols_filter = ticker_df_subcols[(ticker_df_subcols['Market Cap'] < market_cap_upper_threshold) & (ticker_df_subcols['Market Cap'] > market_cap_lower_threshold) ]
+    ticker_df_subcols_filter = ticker_df_subcols[(ticker_df_subcols['Market Cap'] < market_cap_upper_threshold) & (ticker_df_subcols['Market Cap'] > market_cap_lower_threshold) ][0:5]
 
     print(f"Number of symbols at {market_cap_upper_threshold} - {market_cap_lower_threshold}: {ticker_df_subcols_filter.shape}")
 
@@ -138,9 +139,15 @@ def main(tickers, interval=60):
 if __name__ == "__main__":
     app = Flask(__name__)
     latest_data = pd.DataFrame()  # Initialize as an empty DataFrame
+    fromfile = False
 
     # load tickers by market cap
-    nasdaq_tickers, nasdaq_tickers_df = load_filter_tickers(infile="~/Downloads/nasdaq_screener_1744643468853.csv",market_cap_upper_threshold=market_cap_upper_threshold, market_cap_lower_threshold=market_cap_lower_threshold)
+    if fromfile:
+        nasdaq_tickers, nasdaq_tickers_df = load_filter_tickers(infile="~/Downloads/nasdaq_screener_1744643468853.csv",market_cap_upper_threshold=market_cap_upper_threshold, market_cap_lower_threshold=market_cap_lower_threshold)
+    else:
+        nasdaq_tickers = ["OMH","SNOA"]
+        nasdaq_tickers_df=pd.DataFrame()
+
     
     @app.route("/")
     def index():
