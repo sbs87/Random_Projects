@@ -1,0 +1,4 @@
+[
+    { "name": "Bar 1", "address": "123 Main St", "atmosphere": 4, "price": 3, "size": 5, "diversity": 4, "thumbnail": "https://via.placeholder.com/100" },
+    { "name": "Bar 2", "address": "456 Elm St", "atmosphere": 3, "price": 4, "size": 4, "diversity": 5, "thumbnail": "https://via.placeholder.com/100" }
+]

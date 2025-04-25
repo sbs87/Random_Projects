@@ -1,0 +1,216 @@
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMUeGzP3pqtD3z5i5R5V6z5e5e5e5e5e5e5e5e5" crossorigin="anonymous">
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f9f9f9;
+        color: #333;
+        line-height: 1.6;
+    }
+    h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    #filter {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    #filter input {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 100px;
+    }
+    #filter button {
+        padding: 8px 12px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    #filter button:hover {
+        background-color: #2980b9;
+    }
+    table {
+        background-color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    th {
+        background-color: #34495e;
+        color: white;
+    }
+    td img {
+        border-radius: 8px;
+    }
+    td button {
+        padding: 6px 10px;
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    td button:hover {
+        background-color: #c0392b;
+    }
+    #map {
+        margin-top: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bar Ratings App</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        #app { display: flex; flex-direction: column; padding: 20px; }
+        #filter { margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        #map { height: 400px; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>Bar Ratings App</h1>
+        <div id="filter">
+            <label for="filter-score">Filter by Overall Rating:</label>
+            <input type="number" id="filter-score" min="0" max="5" step="0.1">
+            <button onclick="filterBars()">Apply Filter</button>
+        </div>
+        <table id="bar-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Atmosphere</th>
+                    <th>Price</th>
+                    <th>Size</th>
+                    <th>Diversity</th>
+                    <th>Overall</th>
+                    <th>Thumbnail</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div id="map"></div>
+    </div>
+
+    <script>
+        async function fetchBars() {
+            try {
+                // The error occurs because you're trying to fetch a file using a file:// URL, which is not allowed due to browser security restrictions.
+                // To fix this, you need to serve your project using a local server. For example, you can use Python's built-in HTTP server.
+
+                console.log("Fetching bars data...");
+                const response = await fetch('bars.json'); // Replace with the actual path to your JSON file or API endpoint
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                data.forEach(bar => {
+                    bar.overall = ((bar.atmosphere + bar.price + bar.size + bar.diversity) / 4).toFixed(1);
+                });
+                return data;
+            } catch (error) {
+                console.error("Failed to fetch bars data:", error);
+                return [];
+            }
+        }
+
+        let bars = [];
+
+        (async function initializeApp() {
+            bars = await fetchBars();
+            renderTable();
+            window.onload = initMap;
+        })();
+        // const bars = [
+        //     // Example data for 30 bars
+        //     { name: "Bar 1", address: "123 Main St", atmosphere: 4, price: 3, size: 5, diversity: 4, thumbnail: "https://via.placeholder.com/100" },
+        //     { name: "Bar 2", address: "456 Elm St", atmosphere: 3, price: 4, size: 4, diversity: 5, thumbnail: "https://via.placeholder.com/100" },
+        //     // Add 28 more bars here
+        // ];
+
+        // bars.forEach(bar => {
+        //     bar.overall = ((bar.atmosphere + bar.price + bar.size + bar.diversity) / 4).toFixed(1);
+        // });
+
+        function renderTable(filteredBars = bars) {
+            const tbody = document.querySelector("#bar-table tbody");
+            tbody.innerHTML = "";
+            filteredBars.forEach((bar, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${bar.name}</td>
+                    <td>${bar.address}</td>
+                    <td>${bar.atmosphere}</td>
+                    <td>${bar.price}</td>
+                    <td>${bar.size}</td>
+                    <td>${bar.diversity}</td>
+                    <td>${bar.overall}</td>
+                    <td><img src="${bar.thumbnail}" alt="${bar.name}" width="100"></td>
+                    <td><button onclick="addRating(${index})">Add Rating</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function filterBars() {
+            const filterScore = parseFloat(document.getElementById("filter-score").value);
+            if (!isNaN(filterScore)) {
+                const filteredBars = bars.filter(bar => parseFloat(bar.overall) >= filterScore);
+                renderTable(filteredBars);
+            } else {
+                renderTable();
+            }
+        }
+
+        function addRating(index) {
+            const newRating = prompt("Enter your rating (0-5):");
+            const rating = parseFloat(newRating);
+            if (!isNaN(rating) && rating >= 0 && rating <= 5) {
+                const bar = bars[index];
+                bar.overall = ((parseFloat(bar.overall) + rating) / 2).toFixed(1);
+                renderTable();
+            } else {
+                alert("Invalid rating. Please enter a number between 0 and 5.");
+            }
+        }
+
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 40.7128, lng: -74.0060 },
+                zoom: 12,
+            });
+
+            bars.forEach(bar => {
+                const marker = new google.maps.Marker({
+                    position: { lat: 40.7128 + Math.random() * 0.1, lng: -74.0060 + Math.random() * 0.1 },
+                    map,
+                    title: bar.name,
+                });
+            });
+        }
+
+        renderTable();
+        window.onload = initMap;
+    </script>
+</body>
+</html>
