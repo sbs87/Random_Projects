@@ -2,9 +2,6 @@
 # This script extracts and summarizes a YouTube transcript using CHatGPT. 
 # Idea from https://medium.com/towards-data-science/5-ai-projects-you-can-build-this-weekend-with-python-c57724e9c461
 
-import openai
-#from generic_openai_key import API_KEY
-#openai.api_key = API_KEY
 import re
 from youtube_transcript_api import YouTubeTranscriptApi
 import markdown
@@ -45,6 +42,7 @@ transcript_text = '\n'.join(text_list)
 # # TODO change the prompt a bit
 prompt = f"""I have a Youtube transcript. \
 Please summarize the transcript. 
+Also, list all of the stock symbols he mentions and relevant information in a table. 
 
 ### Here is the job description:
 {transcript_text}
