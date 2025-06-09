@@ -8,6 +8,11 @@
       content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0"
     />
     <title>Lightweight Charts™ Customization Tutorial</title>
+    <!-- Adding the standalone version of Lightweight charts -->
+     <script
+     type="text/javascript"
+     src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"
+    ></script>
     <style>
       body {
         padding: 0;
@@ -1071,7 +1076,10 @@
         ];
       }
 
-      // Your code here:
+      // Create the Lightweight Chart within the container element
+      const chart = LightweightCharts.createChart(
+        document.getElementById('container')
+    );
     </script>
   </body>
 </html>
