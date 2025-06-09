@@ -1080,6 +1080,13 @@
       const chart = LightweightCharts.createChart(
         document.getElementById('container')
     );
+    // Generate sample data to use within a candlestick series
+    const candleStickData = generateCandlestickData();
+
+    // Create the Main Series (Candlesticks)
+    const mainSeries = chart.addSeries(LightweightCharts.CandlestickSeries);
+    // Set the data for the Main Serie 
+    mainSeries.setData(candleStickData);
     </script>
   </body>
 </html>
