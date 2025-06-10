@@ -28,7 +28,8 @@
     ></div>
     <script type="text/javascript">
         // Fetch data from a JSON file and use it to populate the chart
-        fetch('stock_order_2025-06-03_MCTR_1m.json')
+        const jsonFilePath = prompt('Please enter the path to the JSON file:', 'stock_order_2025-06-03_MCTR_1m.json');
+        fetch(jsonFilePath)
             .then(response => response.json())
             .then(data => {
                 // Create the Lightweight Chart within the container element
