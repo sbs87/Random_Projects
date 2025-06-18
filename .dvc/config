@@ -1,9 +1,0 @@
-[core]
-    remote = daytrade_data
-    autostage = true
-['remote "daytrade_data"']
-    url = gdrive://1bHYU05eoVueA1CRQ59FfAp-nRDIATynk
-    gdrive_client_id = 45931678842-vqsnuou43pu7jrkq8l7alcf96tfscno9.apps.googleusercontent.com
-    gdrive_client_secret = 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
-['remote "daytrade_data_local"']
-    url = /Users/stevensmith/Projects/Random_Projects/day_trading/data_local
