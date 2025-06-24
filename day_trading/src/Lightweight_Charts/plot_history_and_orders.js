@@ -5,14 +5,15 @@ import { Mycustomplugin } from './mycustomplugin/mycustomplugin.mjs';
 const stockHistoryFile = prompt('Please enter the path to the Stocks price history JSON file:', 'stock_order_2025-06-03_MCTR_1m.json');
 const orderHistoryFile = prompt('Please enter the path to the Stocks Order buy/sell history JSON file:', 'order_history.json');
 
+
+const orderHistoryOptions = { pointColor: '#FF0000', pointRadius: 3}; // { layout: { textColor: 'black', background: { type: 'solid', color: 'white' } } };
+
 const chart = LightweightCharts.createChart(
-            document.getElementById('container')
-        );
+            document.getElementById('container'))
+
 
 // Create both series
-const orderHistorySeries = chart.addCustomSeries(new Mycustomplugin(), {
-	/* Options */
-});
+const orderHistorySeries = chart.addCustomSeries(new Mycustomplugin(),  orderHistoryOptions); // { lineColor: '#2962FF', topColor: '#2962FF', bottomColor: 'rgba(41, 98, 255, 0.28)' });
 const stockHistorySeries = chart.addSeries(LightweightCharts.CandlestickSeries);
 
 function generateBuyData(jsonFilePath) {
