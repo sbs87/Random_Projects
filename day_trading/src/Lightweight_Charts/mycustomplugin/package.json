@@ -1,0 +1,16 @@
+{
+    "name": "mycustomplugin",
+    "type": "module",
+    "main": "./mycustomplugin.umd.cjs",
+    "module": "./mycustomplugin.mjs",
+    "exports": {
+        ".": {
+            "import": "./mycustomplugin.mjs",
+            "require": "./mycustomplugin.umd.cjs",
+            "types": "./mycustomplugin.d.ts"
+        }
+    },
+    "dependencies": {
+        "lightweight-charts": "^5.0.7"
+    }
+}
