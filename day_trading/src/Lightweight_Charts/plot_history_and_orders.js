@@ -7,7 +7,7 @@ import { Mycustomplugin } from './mycustomplugin/mycustomplugin.mjs';
 //import dataJson from '/Users/stevensmith/Projects/Random_Projects/day_trading/src/Lightweight_Charts/order_history.json';
 //import { BackgroundShadeSeries } from '../plugins/background-shade-series/background-shade-series';
 
-import { createChart, LineSeries } from "./mycustomplugin/node_modules/lightweight-charts/dist/lightweight-charts.standalone.production.mjs";
+//import { createChart, LineSeries } from "./mycustomplugin/node_modules/lightweight-charts/dist/lightweight-charts.standalone.production.mjs";
 
 //const chart = createChart(document.body, { width: 400, height: 300 });
 const chart = LightweightCharts.createChart(
