@@ -574,7 +574,6 @@ export interface MycustompluginOptions extends CustomSeriesOptions {
  */
 export interface MycustompluginData extends CustomData {
 	value: number;
-	color: string;
 }
 declare class MycustompluginRenderer<TData extends MycustompluginData> implements ICustomSeriesPaneRenderer {
 	_data: PaneRendererCustomData<Time, TData> | null;

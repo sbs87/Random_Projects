@@ -6,14 +6,14 @@ const stockHistoryFile = prompt('Please enter the path to the Stocks price histo
 const orderHistoryFile = prompt('Please enter the path to the Stocks Order buy/sell history JSON file:', 'order_history.json');
 
 
-const orderHistoryOptions = { pointColor: '#FF0000', pointRadius: 3}; // { layout: { textColor: 'black', background: { type: 'solid', color: 'white' } } };
+//const orderHistoryOptions = { pointRadius: 3}; // { layout: { textColor: 'black', background: { type: 'solid', color: 'white' } } };
 
 const chart = LightweightCharts.createChart(
             document.getElementById('container'))
 
 
 // Create both series
-const orderHistorySeries = chart.addCustomSeries(new Mycustomplugin(),  orderHistoryOptions); // { lineColor: '#2962FF', topColor: '#2962FF', bottomColor: 'rgba(41, 98, 255, 0.28)' });
+const orderHistorySeries = chart.addCustomSeries(new Mycustomplugin()); // { lineColor: '#2962FF', topColor: '#2962FF', bottomColor: 'rgba(41, 98, 255, 0.28)' });
 const stockHistorySeries = chart.addSeries(LightweightCharts.CandlestickSeries);
 
 function generateBuyData(jsonFilePath) {
@@ -35,7 +35,8 @@ fetch(orderHistoryFile)
     .then(data => {
         orderHistorySeries.setData(data.map(entry => ({
             time: entry.time,
-            value: entry.value
+            value: entry.value,
+            color: entry.color || '#2962FF', // Default color if not specified
         })));
     })
     .catch(error => console.error('Error loading order history file JSON data:', error));

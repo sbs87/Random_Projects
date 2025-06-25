@@ -1,0 +1,14 @@
+{
+    "name": "lightweight-charts-dev-server",
+    "version": "1.0.0",
+    "description": "Local dev server for plotting stock candles and orders",
+    "scripts": {
+        "start": "serve /Users/stevensmith/Projects/Random_Projects/day_trading/src/Lightweight_Charts --single"
+    },
+    "devDependencies": {
+        "serve": "^14.2.0"
+    },
+    "dependencies": {
+        "lightweight-charts": "^5.0.7"
+    }
+}
