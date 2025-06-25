@@ -1,4 +1,5 @@
 import { Mycustomplugin } from './mycustomplugin/mycustomplugin.mjs';
+//import { createTimeScale } from 'lightweight-charts';
 
 
 // Fetch data from a JSON file and use it to populate the chart
@@ -11,6 +12,21 @@ const orderHistoryFile = prompt('Please enter the path to the Stocks Order buy/s
 const chart = LightweightCharts.createChart(
             document.getElementById('container'))
 
+
+// Configure the chart's time scale to show minute tick marks
+chart.applyOptions({
+    timeScale: {
+        timeVisible: true,
+        secondsVisible: false,
+        tickMarkFormatter: (time, tickMarkType, locale) => {
+            // time is a business day or timestamp (in seconds)
+            const date = new Date(time * 1000);
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+    }
+});
 
 // Create both series
 const orderHistorySeries = chart.addCustomSeries(new Mycustomplugin()); // { lineColor: '#2962FF', topColor: '#2962FF', bottomColor: 'rgba(41, 98, 255, 0.28)' });
@@ -37,6 +53,7 @@ fetch(stockHistoryFile)
         let buyData = [];
         generateBuyData(orderHistoryFile).then(data => buyData = data);
         // Set the data for the Main Series
+        console.log('Stock history data loaded:', data);
         stockHistorySeries.setData(data);
 
         // // Generate sample data to use within a candlestick series
@@ -52,7 +69,6 @@ fetch(stockHistoryFile)
 
     })
     .catch(error => console.error('Error fetching JSON data:', error));
-
 
 
 fetch(orderHistoryFile)
