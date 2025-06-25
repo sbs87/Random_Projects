@@ -43,3 +43,45 @@ with open(output_file, mode='w', encoding='utf-8') as json_file:
     json.dump(transformed_data, json_file, indent=4)
 
 print(f"json file created: {output_file}")
+
+
+order_csv_path = '/Users/stevensmith/Projects/Random_Projects/day_trading/data/raw_data/order_hx/Webull_Order_Records_2025_06_16.csv'  # Path to the order summary CSV file
+output_json_path = "/Users/stevensmith/Projects/Random_Projects/day_trading/src/Lightweight_Charts/foo.json"
+# Additional section: Convert order summary CSV to filtered JSON
+def convert_order_summary_to_json(order_csv_path, output_json_path):
+    filtered_orders = []
+    with open(order_csv_path, mode='r', encoding='utf-8') as csv_file:
+        reader = csv.DictReader(csv_file)
+        for row in reader:
+            if (row.get('Status', '').strip().lower() == 'filled') and row.get('Symbol', '').strip()=="VERO":
+                dt_str = row['Filled Time'].replace("EDT", "").strip()
+                dt_obj = datetime.strptime(dt_str, "%m/%d/%Y %H:%M:%S")
+                dt_obj = dt_obj.replace(tzinfo=None)
+                timestamp = int(datetime.strptime(dt_str, "%m/%d/%Y %H:%M:%S").timestamp())
+                timestamp = timestamp - (timestamp % 60)
+
+                # # Convert 'Datetime' like '2025-06-06 09:30:00-04:00' to unix timestamp
+                # if '-' in row['Datetime'] and ':' in row['Datetime']:
+                # dt_obj = datetime.strptime(row['Datetime'], "%Y-%m-%d %H:%M:%S%z")
+                # timestamp = int(dt_obj.timestamp())
+                if row['Side'] == 'Buy':
+                    output_color = "#FFA200"
+                if row['Side'] == 'Sell':
+                    output_color = "#0055FF"
+                filtered_orders.append({
+                    "symbol": row['Symbol'],
+                    "time": timestamp,
+                    "num_shares" : row['Filled'],
+                    "buy_sell": row['Side'],
+                    "color": output_color,
+                    "value": float(row['Avg Price'])
+                })
+    with open(output_json_path, mode='w', encoding='utf-8') as json_file:
+        json.dump(filtered_orders, json_file, indent=4)
+    print(f"Filtered order summary JSON created: {output_json_path}")
+convert_order_summary_to_json(order_csv_path, output_json_path)
+# Example usage:
+# convert_order_summary_to_json('order_summary.csv', 'order_summary_filtered.json')
+#Datetime Symbol,  Side,    Status,  Filled , AvgPrice               Time-in-Force   PlacedTime      FilledTime      Date    Time    UID     Total_Price   
+
+
