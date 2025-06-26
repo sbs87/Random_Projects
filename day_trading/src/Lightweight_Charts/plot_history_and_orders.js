@@ -1,59 +1,59 @@
 import { Mycustomplugin } from './mycustomplugin/mycustomplugin.mjs';
 // Create a form for user input
-// const form = document.createElement('form');
-// form.style.textAlign = 'center';
-// form.style.margin = '20px 0';
+const form = document.createElement('form');
+form.style.textAlign = 'center';
+form.style.margin = '20px 0';
 
-// const label = document.createElement('label');
-// label.textContent = 'Stock Name: ';
-// label.htmlFor = 'stockNameInput';
+const label = document.createElement('label');
+label.textContent = 'Stock Name: ';
+label.htmlFor = 'stockNameInput';
 
-// const input = document.createElement('input');
-// input.type = 'text';
-// input.id = 'stockNameInput';
-// input.value = 'ACXP';
-// input.style.marginRight = '10px';
+const input = document.createElement('input');
+input.type = 'text';
+input.id = 'stockNameInput';
+input.value = 'ACXP';
+input.style.marginRight = '10px';
 
-// const dateLabel = document.createElement('label');
-// dateLabel.textContent = 'Date: ';
-// dateLabel.htmlFor = 'stockDateInput';
+const dateLabel = document.createElement('label');
+dateLabel.textContent = 'Date: ';
+dateLabel.htmlFor = 'stockDateInput';
 
-// const dateInput = document.createElement('input');
-// dateInput.type = 'date';
-// dateInput.id = 'stockDateInput';
-// dateInput.value = '2025-06-17';
-// dateInput.style.marginRight = '10px';
+const dateInput = document.createElement('input');
+dateInput.type = 'date';
+dateInput.id = 'stockDateInput';
+dateInput.value = '2025-06-17';
+dateInput.style.marginRight = '10px';
 
-// const submitBtn = document.createElement('button');
-// submitBtn.type = 'submit';
-// submitBtn.textContent = 'Load Chart';
+const submitBtn = document.createElement('button');
+submitBtn.type = 'submit';
+submitBtn.textContent = 'Load Chart';
 
-// form.appendChild(label);
-// form.appendChild(input);
-// form.appendChild(dateLabel);
-// form.appendChild(dateInput);
-// form.appendChild(submitBtn);
+form.appendChild(label);
+form.appendChild(input);
+form.appendChild(dateLabel);
+form.appendChild(dateInput);
+form.appendChild(submitBtn);
 
-// document.body.insertBefore(form, document.getElementById('container'));
+document.body.insertBefore(form, document.getElementById('container'));
 
-// // Prevent default form submission and reload chart with new values
-// form.addEventListener('submit', function(e) {
-//     e.preventDefault();
-//     location.search = `?stockName=${encodeURIComponent(input.value)}&stockDate=${encodeURIComponent(dateInput.value)}`;
-// });
+// Prevent default form submission and reload chart with new values
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    location.search = `?stockName=${encodeURIComponent(input.value)}&stockDate=${encodeURIComponent(dateInput.value)}`;
+});
 
-// // Parse URL parameters for stockName and stockDate
-// function getQueryParam(param, defaultValue) {
-//     const urlParams = new URLSearchParams(window.location.search);
-//     return urlParams.get(param) || defaultValue;
-// }
+// Parse URL parameters for stockName and stockDate
+function getQueryParam(param, defaultValue) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param) || defaultValue;
+}
 
-// const stockName = getQueryParam('stockName', input.value);
-// const stockDate = getQueryParam('stockDate', dateInput.value);
+const stockName = getQueryParam('stockName', input.value);
+const stockDate = getQueryParam('stockDate', dateInput.value);
 
 // Fetch data from a JSON file and use it to populate the chart
-const stockName = prompt('Please enter the stock name:', 'ACXP');
-const stockDate = prompt('Please enter the stock date:', '2025-06-17');
+// const stockName = prompt('Please enter the stock name:', 'ACXP');
+// const stockDate = prompt('Please enter the stock date:', '2025-06-17');
 const stockHistoryFile = `data/stock_hx_${stockName}_${stockDate}.json`;
 const orderHistoryFile = `data/stock_order_${stockName}_${stockDate}.json`; //prompt('Please enter the path to the Stocks Order buy/sell history JSON file:', 'order_history.json');
 
