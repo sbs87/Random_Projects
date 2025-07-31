@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lightweight Candlestick Chart with Buy/Sell Overlays</title>
+    <script src="https://unpkg.com/lightweight-charts@4.0.0/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        #chart { width: 800px; height: 400px; }
+    </style>
+</head>
+<body>
+    <div id="chart"></div>
+    <input type="file" id="jsonFile" accept=".json">
+    <script>
+        const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+            layout: { background: { color: '#fff' }, textColor: '#222' },
+            grid: { vertLines: { color: '#eee' }, horzLines: { color: '#eee' } },
+            timeScale: { timeVisible: true, secondsVisible: true },
+        });
+        const candleSeries = chart.addCandlestickSeries();
+
+        // Overlay line series for buy/sell
+        const buyLineSeries = chart.addLineSeries({ color: 'blue', lineWidth: 2 });
+        const sellLineSeries = chart.addLineSeries({ color: 'red', lineWidth: 2 });
+
+        // Helper to plot horizontal line segment at a given time and price
+        function plotLineSegment(series, time, price) {
+            // Draw a short horizontal line segment (1 minute width)
+            const prevTime = time - 60; // 1 minute before
+            const nextTime = time + 60; // 1 minute after
+            series.setData([
+                { time: prevTime, value: price },
+                { time: time, value: price },
+                { time: nextTime, value: price }
+            ]);
+        }
+
+        document.getElementById('jsonFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const data = JSON.parse(evt.target.result);
+
+                // Expecting: { candles: [{time, open, high, low, close}], overlays: [{time, price, type}] }
+                candleSeries.setData(data.candles.map(c => ({
+                    time: c.time, open: c.open, high: c.high, low: c.low, close: c.close
+                })));
+
+                // Clear previous overlays
+                buyLineSeries.setData([]);
+                sellLineSeries.setData([]);
+
+                // Overlay buy/sell lines
+                data.overlays.forEach(o => {
+                    if (o.type === 'buy') plotLineSegment(buyLineSeries, o.time, o.price);
+                    else if (o.type === 'sell') plotLineSegment(sellLineSeries, o.time, o.price);
+                });
+            };
+            reader.readAsText(file);
+        });
+    </script>
+</body>
+</html>
