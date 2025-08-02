@@ -34,16 +34,39 @@
                 { time: nextTime, value: price }
             ]);
         }
+        let stock_symbol = '';
+        let date = '';
+
+        document.getElementById('jsonFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const match = file.name.match(/^combined_(.+)_(\d{4}-\d{2}-\d{2})\.json$/);
+                if (match) {
+                    stock_symbol = match[1];
+                    date = match[2];
+                }
+            }
+        });
 
         document.getElementById('jsonFile').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
+            const match = file.name.match(/^combined_(.+)_(\d{4}-\d{2}-\d{2})\.json$/);
+            if (match) {
+                    stock_symbol = match[1];
+                    date = match[2];
+            }else {
+                alert('Invalid file name format. Expected: combined_<symbol>_<date>.json. Setting to defaults');
+                stock_symbol = 'UNKNOWN';
+                date = 'UNKNOWN';
+            }   
+            document.title = `(${stock_symbol} - ${date})`;
             const reader = new FileReader();
             reader.onload = function(evt) {
                 const data = JSON.parse(evt.target.result);
 
                 // Expecting: { candles: [{time, open, high, low, close}], overlays: [{time, price, type}] }
-                candleSeries.setData(data.candles.map(c => ({
+                candleSeries.setData(data.stock_history.map(c => ({
                     time: c.time, open: c.open, high: c.high, low: c.low, close: c.close
                 })));
 
@@ -52,7 +75,7 @@
                 sellLineSeries.setData([]);
 
                 // Overlay buy/sell lines
-                data.overlays.forEach(o => {
+                data.stock_orders.forEach(o => {
                     if (o.type === 'buy') plotLineSegment(buyLineSeries, o.time, o.price);
                     else if (o.type === 'sell') plotLineSegment(sellLineSeries, o.time, o.price);
                 });
