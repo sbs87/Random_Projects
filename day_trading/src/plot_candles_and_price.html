@@ -9,15 +9,34 @@
     </style>
 </head>
 <body>
+    <div
+      id="container"
+      style="position: absolute; width: 100%; height: 100%"
+  
+    >
+<!-- </div> -->
+
     <div id="chart"></div>
     <input type="file" id="jsonFile" accept=".json">
     <script>
+
+    let stock_symbol = 'UNKNOWN';
+    let date = 'UNKNOWN';
+        
+const container = document.getElementById('container');
+const title = document.createElement('h2');
+title.textContent = `Stock: ${stock_symbol} | Date: ${date}`;
+title.style.textAlign = 'center';
+title.style.margin = '10px 0';
+container.parentNode.insertBefore(title, container);
+
         const chart = LightweightCharts.createChart(document.getElementById('chart'), {
             layout: { background: { color: '#fff' }, textColor: '#222' },
             grid: { vertLines: { color: '#eee' }, horzLines: { color: '#eee' } },
             timeScale: { timeVisible: true, secondsVisible: true },
         });
         const candleSeries = chart.addCandlestickSeries();
+
 
         // Overlay line series for buy/sell
         const buyLineSeries = chart.addLineSeries({ color: 'blue', lineWidth: 2 });
@@ -32,21 +51,24 @@
                 { time: prevTime, value: price },
                 { time: time, value: price },
                 { time: nextTime, value: price }
+                
             ]);
+            console.log(`Overlay at time: ${time}, price: ${price}`);
         }
-        let stock_symbol = '';
-        let date = '';
 
-        document.getElementById('jsonFile').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const match = file.name.match(/^combined_(.+)_(\d{4}-\d{2}-\d{2})\.json$/);
-                if (match) {
-                    stock_symbol = match[1];
-                    date = match[2];
-                }
-            }
-        });
+
+        function scrollToTime(time, timeScale){
+
+            const currentPosition = timeScale.scrollPosition();
+            const currentVisibleLogicalRange = timeScale.getVisibleLogicalRange();
+            const coordinate = timeScale.timeToCoordinate(time);
+            const logicalIndex = timeScale.coordinateToLogical(coordinate);
+            const targetPosition = currentPosition - currentVisibleLogicalRange.to + logicalIndex;
+            console.log(`Scrolling to time: ${time}, coordinate: ${coordinate}, logicalIndex: ${logicalIndex}, targetPosition: ${targetPosition}`);
+            timeScale.scrollToPosition(targetPosition, true);
+        }
+
+    
 
         document.getElementById('jsonFile').addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -57,10 +79,10 @@
                     date = match[2];
             }else {
                 alert('Invalid file name format. Expected: combined_<symbol>_<date>.json. Setting to defaults');
-                stock_symbol = 'UNKNOWN';
-                date = 'UNKNOWN';
+
             }   
             document.title = `(${stock_symbol} - ${date})`;
+            title.textContent = `Stock: ${stock_symbol} | Date: ${date}`;
             const reader = new FileReader();
             reader.onload = function(evt) {
                 const data = JSON.parse(evt.target.result);
@@ -78,10 +100,19 @@
                 data.stock_orders.forEach(o => {
                     if (o.type === 'buy') plotLineSegment(buyLineSeries, o.time, o.price);
                     else if (o.type === 'sell') plotLineSegment(sellLineSeries, o.time, o.price);
+                // chart.timeScale().scrollToPosition(-100, true);
                 });
             };
             reader.readAsText(file);
+            //chart.timeScale().scrollToPosition(-100, true);
+            scrollToTime(1754050620, chart.timeScale());
+
+            
         });
+        //chart.timeScale().scrollToPosition();
+       
     </script>
+
+</div>
 </body>
 </html>
