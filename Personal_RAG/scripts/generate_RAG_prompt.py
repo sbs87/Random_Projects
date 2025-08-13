@@ -1,12 +1,11 @@
 """
-Script to query the RAG system with a question and generate a prompt for an LLM.
+Script to generate a prompt for an LLM based on RAG.
 Reads a question from a text file, retrieves relevant context chunks from the indexed documents,
 and formats a prompt for the LLM.
 
 Steve Smith
 August 2025
-
-query.py --question_file questions/q1.txt
+generate_RAG_prompt.py --question_file questions/q1.txt
 
 """
 import json
