@@ -1,4 +1,11 @@
-# scripts/ingest.py
+"""
+Ingest PDFs and Markdown notes, chunk, embed, and index with FAISS.
+
+Steve Smith
+August 2025
+
+ingest.py"""
+
 import os, re, json, hashlib
 from pathlib import Path
 from datetime import datetime
