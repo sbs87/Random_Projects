@@ -1,4 +1,13 @@
-import requests, json
+"""
+Script to send a prompt to a local LLM server and get a response.
+
+Steve Smith
+August 2025
+
+query_lmm.py --prompt_file prompt/prompt.txt
+
+"""
+import requests, json   
 import argparse
 
 
