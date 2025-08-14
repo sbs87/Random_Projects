@@ -15,6 +15,7 @@ from sentence_transformers import SentenceTransformer
 from pathlib import Path
 import argparse
 
+
 #TODO make the folloiwng configurable: 
 ## STORE_DIR, PROMPT_DIR, K, EMB_MODEL, index and meta paths
 ## basic analytics like how RAG docs were chosen, number of chunks, avg chunk size, etc
@@ -56,7 +57,7 @@ def format_prompt(question, contexts):
     bullets = []
     for c in contexts:
         md = c["metadata"]
-        src = f'{md["title"]} (p.{md["page"]})' if md["page"] else md["title"]
+        src = f'{md["title"]} (p.{md["page"]}), company: {md["company"]}' if md["page"] else md["title"]
         bullets.append(f"[{src}] {c['text']}")
     context_text = "\n\n---\n".join(bullets)
     return f"""You are a helpful assistant. Use only the CONTEXT to answer.

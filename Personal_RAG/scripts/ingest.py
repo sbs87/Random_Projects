@@ -16,6 +16,9 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from pypdf import PdfReader
 import frontmatter
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin, urlparse
 
 DATA_DIR = Path("data")
 STORE_DIR = Path("store")
@@ -42,8 +45,53 @@ def chunk_recursive(text: str, max_tokens=800, overlap=150) -> List[str]:
         i += step
     return chunks
 
+def web_docs(base_url: str, company: str, max_pages: int = 10) -> Iterator[Dict]:
+    visited = set()
+    to_visit = [base_url]
+    count = 0
+
+    while to_visit and count < max_pages:
+        url = to_visit.pop(0)
+        if url in visited:
+            continue
+        visited.add(url)
+        try:
+            resp = requests.get(url, timeout=10)
+            resp.raise_for_status()
+            soup = BeautifulSoup(resp.text, "html.parser")
+            # Extract visible text
+            for script in soup(["script", "style", "header", "footer", "nav", "aside"]):
+                script.decompose()
+            text = soup.get_text(separator="\n")
+            text = normalize(text)
+            if text.strip():
+                for c in chunk_recursive(text):
+                    yield {
+                        "text": c,
+                        "metadata": {
+                            "source": url,
+                            "company": company,
+                            "doc_type": "web",
+                            "title": soup.title.string.strip() if soup.title and soup.title.string else url,
+                            "page": None,
+                            "section": None,
+                            "created_at": datetime.now().strftime("%Y-%m-%d"),
+                            "tags": ["web"]
+                        }
+                    }
+            count += 1
+            # Find and queue internal links
+            domain = urlparse(base_url).netloc
+            for link in soup.find_all("a", href=True):
+                href = urljoin(url, link["href"])
+                if urlparse(href).netloc == domain and href not in visited and href.startswith("http"):
+                    to_visit.append(href)
+        except Exception:
+            continue
+
 def pdf_docs() -> Iterator[Dict]:
     for pdf_path in (DATA_DIR/"pdfs").glob("**/*.pdf"):
+        fname = os.path.basename(pdf_path).replace(".pdf","")
         reader = PdfReader(str(pdf_path))
         for p, page in enumerate(reader.pages):
             raw = page.extract_text() or ""
@@ -55,6 +103,7 @@ def pdf_docs() -> Iterator[Dict]:
                     "text": c,
                     "metadata": {
                         "source": str(pdf_path),
+                        "company":fname,
                         "doc_type": "pdf",
                         "title": pdf_path.stem,
                         "page": p+1,
@@ -134,5 +183,7 @@ def build_index(items: List[Dict], model_name=EMB_MODEL):
 
 
 if __name__ == "__main__":
-    items = list(pdf_docs()) + list(md_docs())
+    items = list(pdf_docs()) + list(md_docs()) + list(web_docs("https://foo.com/", company="cn",max_pages=5))
+    #webs=web_docs("https://sagadiagnostics.com/", max_pages=5)  # Example usage of web_docs
+    #[print(it["text"]) for it in webs]
     build_index(items)

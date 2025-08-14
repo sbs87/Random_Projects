@@ -17,8 +17,8 @@ args = parser.parse_args()
 prompt_file=args.prompt_file
 
 
-def generate(prompt, provider="openai"):
-    if provider=="openai":
+def generate(prompt, model="llama3"):
+    if model=="llama3":
         r = requests.post("http://localhost:11434/api/generate", json={"model":"llama3","prompt":prompt, "stream":False})
         return r.json()["response"]
     
