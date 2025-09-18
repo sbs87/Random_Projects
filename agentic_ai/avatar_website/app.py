@@ -1,3 +1,10 @@
+"""
+This is an agentic AI chatbot that acts as me, Steve Smith, on my personal website.
+September 2025
+Ed Donnor (Udemy)
+Steve Smith (personal use modifications)
+"""
+
 from dotenv import load_dotenv
 from openai import OpenAI
 import json
@@ -5,10 +12,19 @@ import os
 import requests
 from pypdf import PdfReader
 import gradio as gr
+import gspread
+from datetime import datetime, timezone
+
+# load API keys and other config from .env file
+load_dotenv(override=True) 
+
+# Use Google Sheets to log questions. FIXME: this is clunky and needs to be improved.
+svc = json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"])
+gc = gspread.service_account_from_dict(svc)
+ws = gc.open_by_key(os.environ["GOOGLE_SHEET_ID"]).sheet1
 
 
-load_dotenv(override=True)
-
+# Send push notifications form users using Pushover
 def push(text):
     requests.post(
         "https://api.pushover.net/1/messages.json",
@@ -19,14 +35,37 @@ def push(text):
         }
     )
 
+## Agentic AI tools. 
+# TODO: improve and expand
+def record_user_question(question):
+    push(f"Recording user question: {question}")
+    return {"recorded": "ok"}
 
 def record_user_details(email, name="Name not provided", notes="not provided"):
     push(f"Recording {name} with email {email} and notes {notes}")
     return {"recorded": "ok"}
 
 def record_unknown_question(question):
-    push(f"Recording {question}")
+    push(f"Recording unknown question: {question}")
     return {"recorded": "ok"}
+
+# Define the tools in JSON format for OpenAI function calling
+record_user_question_json = {
+    "name": "record_user_question",
+    "description": "Use this tool to record a user's question. May need to disable depending on how many questions are being recorded. Or save it to a database instead.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "question": {
+                "type": "string",
+                "description": "User's question"
+            }
+        },
+        "required": ["question"],
+        "additionalProperties": False
+    }
+}
+
 
 record_user_details_json = {
     "name": "record_user_details",
@@ -69,10 +108,15 @@ record_unknown_question_json = {
     }
 }
 
+# Combine all tools
 tools = [{"type": "function", "function": record_user_details_json},
-        {"type": "function", "function": record_unknown_question_json}]
+        {"type": "function", "function": record_unknown_question_json},
+        {"type": "function", "function": record_user_question_json}
+       ]
 
 
+# Define the Me class that encapsulates the chatbot's behavior
+#TODO: load in more docs/implement RAG for better, personalized answers
 class Me:
 
     def __init__(self):
@@ -87,7 +131,7 @@ class Me:
         with open("me/summary.txt", "r", encoding="utf-8") as f:
             self.summary = f.read()
 
-
+    # Tool handling
     def handle_tool_call(self, tool_calls):
         results = []
         for tool_call in tool_calls:
@@ -99,6 +143,7 @@ class Me:
             results.append({"role": "tool","content": json.dumps(result),"tool_call_id": tool_call.id})
         return results
     
+    # Define master prompt
     def system_prompt(self):
         system_prompt = f"You are acting as {self.name}. You are answering questions on {self.name}'s website, \
 particularly questions related to {self.name}'s career, background, skills and experience. \
@@ -106,14 +151,20 @@ Your responsibility is to represent {self.name} for interactions on the website 
 You are given a summary of {self.name}'s background and LinkedIn profile which you can use to answer questions. \
 Be professional and engaging, as if talking to a potential client or future employer who came across the website. \
 If you don't know the answer to any question, use your record_unknown_question tool to record the question that you couldn't answer, even if it's about something trivial or unrelated to career. \
-If the user is engaging in discussion, try to steer them towards getting in touch via email; ask for their email and record it using your record_user_details tool. "
-
+If the user is engaging in discussion, try to steer them towards getting in touch via email; ask for their email and record it using your record_user_details tool. \
+Record all other questions using your record_user_question tool, even if it's about something trivial. Do not skip recording user prompts or questions. \
+If you didn't use any tools, say so explicitly. "
         system_prompt += f"\n\n## Summary:\n{self.summary}\n\n## LinkedIn Profile:\n{self.linkedin}\n\n"
         system_prompt += f"With this context, please chat with the user, always staying in character as {self.name}."
         return system_prompt
     
+
+    # Make a call to OpenAI with the chat history and handle tool calls
     def chat(self, message, history):
         messages = [{"role": "system", "content": self.system_prompt()}] + history + [{"role": "user", "content": message}]
+        
+        # record inb google sheet. Clunky need to improve
+        ws.append_row([datetime.utcnow().isoformat(), message])
         done = False
         while not done:
             response = self.openai.chat.completions.create(model="gpt-4o-mini", messages=messages, tools=tools)
